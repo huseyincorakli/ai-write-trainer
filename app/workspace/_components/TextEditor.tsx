@@ -8,6 +8,7 @@ import EditorExtensions from "./EditorExtensions";
 import { ListItem } from '@tiptap/extension-list'
 
 const TextEditor = () => {
+  
   const editor = useEditor({
     extensions: [
       StarterKit,

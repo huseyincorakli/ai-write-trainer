@@ -31,3 +31,29 @@ export const ingest = action({
     );
   },
 });
+
+export const search = action({
+  args: {
+    query: v.string(),
+    fileId:v.string()
+  },
+  handler: async (ctx, args) => {
+    
+     const apiKey = process.env.GOOGLE_GENAI_API_KEY;
+    
+    if (!apiKey) {
+      throw new Error("GOOGLE_GENAI_API_KEY is not defined in environment variables.");
+    }
+    const vectorStore = new ConvexVectorStore(new GoogleGenerativeAIEmbeddings({
+        apiKey: apiKey,
+        model: "text-embedding-004", 
+        taskType: TaskType.RETRIEVAL_DOCUMENT,
+        title: "Document title",
+      }), { ctx });
+
+    const resultOne = await (await vectorStore.similaritySearch(args.query, 3))
+    .filter(q=>q.metadata.file==args.fileId);
+      
+    return JSON.stringify(resultOne);
+  },
+});
