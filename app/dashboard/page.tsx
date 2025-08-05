@@ -1,12 +1,24 @@
 "use client";
 import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
+import { Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
 const Dashboard = () => {
+  const deleteFile = useMutation(api.fileStorage.deleteFile);
+  
+  const onDeleteFile = async (fileId: string) => {
+    const a = prompt("Are you sure you want to delete this file? Type 'DELETE' or 'delete' to confirm.");
+    if (a?.toLocaleLowerCase() !== "delete") {
+      return;
+    }
+    
+  await deleteFile({fileId:fileId});
+}
   const { user } = useUser();
   const userFiles = useQuery(
     api.fileStorage.getUserFiles,
@@ -23,6 +35,7 @@ const Dashboard = () => {
     return new Date(Math.floor(value))
   }
 
+  
   return (
     <div>
       <h2 className="font-medium text-2xl">Workspace</h2>
@@ -55,8 +68,11 @@ const Dashboard = () => {
           {userFiles.map((file, index) => (
             <div
               key={index}
-              className="flex flex-col p-3 shadow-md justify-center items-center border transition-all duration-100 hover:shadow-lg"
-            >
+              className="relative flex flex-col p-3 shadow-md justify-center items-center border transition-all duration-100 hover:shadow-lg"
+            > 
+              <div onClick={()=>{onDeleteFile(file.fileId)}} className="absolute top-1 right-1  bg-blue-500 text-white rounded-full px-2 py-2 text-xs cursor-pointer hover:bg-red-400">
+                <Trash width={18} height={18} />
+              </div>
               <Link href={`/workspace/${file.fileId}`} className="flex flex-col items-center text-center">
                 <div className="flex justify-center items-center mb-2">
                   <Image

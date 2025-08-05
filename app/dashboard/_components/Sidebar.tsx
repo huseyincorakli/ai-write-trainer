@@ -1,38 +1,63 @@
-import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
-import { Layout, Shield } from 'lucide-react'
-import Image from 'next/image'
-import React from 'react'
-import UploadPdfDialog from './UploadPdfDialog'
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Layout, Shield } from "lucide-react";
+import Image from "next/image";
+import React from "react";
+import UploadPdfDialog from "./UploadPdfDialog";
+import { useUser } from "@clerk/nextjs";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const Sidebar = () => {
+const path = usePathname();
+  
+
+  const { user } = useUser();
+  const userFiles = useQuery(
+    api.fileStorage.getUserFiles,
+    user?.primaryEmailAddress
+      ? {
+          createdBy: user.primaryEmailAddress.emailAddress,
+        }
+      : "skip"
+  );
   return (
-    <div className='shadow-sm h-screen p-8'>
-      <Image src={'/logo.svg'} alt='logo' width={170} height={120} />
-      <div className='mt-10'>
-       <UploadPdfDialog>
-        <Button className='w-full'>+ Upload PDF</Button>
+    <div className="shadow-sm h-screen p-8">
+      <Image src={"/logo.svg"} alt="logo" width={170} height={120} />
+      <div className="mt-10">
+        <UploadPdfDialog>
+          <Button className="w-full">+ Upload PDF</Button>
         </UploadPdfDialog>
 
-        <div className='flex gap-2 items-center p-3 mt-5 hover:bg-slate-300 rounded-lg cursor-pointer'>
-            <Layout/>
-            <h2>Workspace</h2>
+        <Link href={"/dashboard"}>
+        <div className={`flex gap-2 items-center p-3 mt-5 hover:bg-slate-300 rounded-lg cursor-pointer  ${path === "/dashboard" ? "bg-slate-300" : ""}`}>
+          <Layout />
+          <h2>Workspace</h2>
         </div>
-        <div className='flex gap-2 items-center p-3 mt-1 hover:bg-slate-300 rounded-lg cursor-pointer'>
-            <Shield/>
-            <h2>Upgrade</h2>
+        </Link>
+        <Link href={"/dashboard/pricing"}>
+        <div
+          
+          className={`flex gap-2 items-center p-3 mt-1 hover:bg-slate-300 rounded-lg cursor-pointer ${path === "/dashboard/pricing" ? "bg-slate-300" : ""}`}
+        >
+          <Shield />
+          <h2>Upgrade</h2>
         </div>
+        </Link>
       </div>
 
-      <div className='absolute bottom-24 w-[80%]'>
-        <Progress value={33} />
-        <p className='text-sm mt-1'>2 out of 5 PDF Uploaded</p>
+      <div className="absolute bottom-24 w-[80%]">
+        <Progress value={userFiles && (userFiles.length / 5) * 100} />
+        <p className="text-sm mt-1">
+          {userFiles && userFiles.length} out of 5 PDF Uploaded
+        </p>
 
-        <p className='text-xs text-gray-400 mt-3'>Upgrade to Upload more PDF</p>
+        <p className="text-xs text-gray-400 mt-3">Upgrade to Upload more PDF</p>
       </div>
-      
     </div>
-  )
-}
+  );
+};
 
-export default Sidebar
+export default Sidebar;

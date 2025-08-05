@@ -3,6 +3,8 @@ import { Outfit } from "next/font/google";
 import "./globals.css";
 import Provider from "./provider";
 import { ClerkProvider } from "@clerk/nextjs";
+import { ShowDialog } from "./components/Dialog";
+
 
 
 
@@ -29,6 +31,7 @@ export default function RootLayout({
         </Provider>
       </body>
     </html>
+    <ShowDialog />
     </ClerkProvider>
   );
 }

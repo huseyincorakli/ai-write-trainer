@@ -65,3 +65,33 @@ export const getUserFiles = query({
       .collect();
   },
 });
+
+export const deleteFile = mutation({
+  args: {
+    fileId: v.string(),
+  },
+  handler: async (ctx, args) => {
+   const file = await ctx.db.query("pdfFiles").filter((q) => q.eq(q.field("fileId"), args.fileId)).collect();
+   
+  if(file&& file.length>0){
+    const documents = await ctx.db.query('documents').filter(q=>q.eq(q.field('metadata.file'),args.fileId)).collect();
+    const notes = await ctx.db.query('notes').filter(q=>q.eq(q.field('fileId'),args.fileId)).collect();
+
+     
+     try {
+      await ctx.storage.delete(file[0].storageId)
+      await ctx.db.delete(file[0]._id);
+      for (const doc of documents) {
+        await ctx.db.delete(doc._id);
+      }
+      for (const note of notes) {
+        await ctx.db.delete(note._id);
+      }
+     } catch (error) {
+      
+     }
+  }
+      
+
+    return "File deleted successfully";
+  }})
